@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { BusinessInput, ScoreCard } from "./types";
 
 /**
@@ -19,15 +18,15 @@ import { BusinessInput, ScoreCard } from "./types";
  * 3. Output is forced into strict JSON so the rest of the app never has
  *    to parse free-form prose.
  *
- * WHY GEMINI, NOT ANTHROPIC: this project runs on a zero-budget stack.
- * Google AI Studio issues Gemini API keys with a genuinely free tier
- * (no credit card required at all), unlike Anthropic's API which is
- * pay-as-you-go from the first request. Swap back to Claude later by
- * restoring this file from git history if/when there's a budget for it —
- * the rest of the app (rule engine, scoring, PDF) is provider-agnostic.
+ * WHY GROQ, NOT GEMINI: Google AI Studio's free tier turned out to be
+ * region-restricted — it silently sets a 0-request quota for accounts in
+ * some countries (this project hit that wall from Pakistan). Groq's free
+ * tier has no such restriction and needs no credit card. Swap providers
+ * again later by editing just this file — the rest of the app (rule
+ * engine, scoring, PDF) doesn't know or care which LLM wrote the prose.
  */
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
 export interface AiSynthesisOutput {
   icp: {
@@ -53,8 +52,8 @@ export async function synthesizeWithAi(
   input: BusinessInput,
   facts: ScoreCard[]
 ): Promise<AiSynthesisOutput> {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY not configured");
+  if (!GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY not configured");
   }
 
   const factsSummary = facts
@@ -93,18 +92,34 @@ Return JSON with EXACTLY this shape:
   "retentionRisk": { "signal": "high"|"medium"|"low", "note": string }
 }`;
 
-  const model = genAI.getGenerativeModel({
-    model: MODEL,
-    systemInstruction: systemPrompt,
-    generationConfig: {
-      temperature: 0, // deterministic as possible
-      responseMimeType: "application/json",
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${GROQ_API_KEY}`,
     },
+    body: JSON.stringify({
+      model: MODEL,
+      temperature: 0, // deterministic as possible
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    }),
   });
 
-  const result = await model.generateContent(userPrompt);
-  const text = result.response.text();
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    throw new Error(`Groq API error (HTTP ${res.status}): ${errText.slice(0, 300)}`);
+  }
 
-  const cleaned = text.replace(/```json|```/g, "").trim();
+  const data = await res.json();
+  const content: string | undefined = data.choices?.[0]?.message?.content;
+  if (!content) {
+    throw new Error("No content in Groq response");
+  }
+
+  const cleaned = content.replace(/```json|```/g, "").trim();
   return JSON.parse(cleaned) as AiSynthesisOutput;
 }

@@ -9,7 +9,7 @@ scoring + AI-written synthesis) with a downloadable branded PDF.
 
 | Key | Where to get it | Cost |
 |---|---|---|
-| `GEMINI_API_KEY` | https://aistudio.google.com/apikey → sign in with Gmail → "Create API key" | Free, no card |
+| `GROQ_API_KEY` | https://console.groq.com/keys → sign in with Gmail → "Create API key" | Free, no card |
 | `GOOGLE_SAFE_BROWSING_API_KEY` | https://console.cloud.google.com → APIs & Services → Library → enable "Safe Browsing API" → Credentials → Create API Key | Free, no card |
 | `GOOGLE_PAGESPEED_API_KEY` | Same Google Cloud project → enable "PageSpeed Insights API" → reuse or create a key | Free, no card |
 

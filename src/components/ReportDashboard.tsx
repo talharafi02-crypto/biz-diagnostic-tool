@@ -105,7 +105,7 @@ export default function ReportDashboard({
             Reason: {report.aiError || "Unknown error"}
             <br />
             All the live-data scorecards below are unaffected — this only affects the AI-written sections. If this
-            keeps happening, double check the <code>GEMINI_API_KEY</code> in your deployment settings.
+            keeps happening, double check the <code>GROQ_API_KEY</code> in your deployment settings.
           </div>
         )}
 

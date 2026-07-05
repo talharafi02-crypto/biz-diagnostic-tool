@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { scrapeSite } from "@/lib/apis/scraper";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const schema = z.object({ websiteUrl: z.string().url() });
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
 /**
  * Best-effort auto-fill: scrapes the site's visible text (title, meta
@@ -34,13 +33,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!GROQ_API_KEY) {
       // No AI configured — return whatever raw signal we can without it.
       return NextResponse.json({
         businessType: "",
         productService: "",
         location: "",
-        note: "Auto-detect needs GEMINI_API_KEY to be configured. Fields left blank for manual entry.",
+        note: "Auto-detect needs GROQ_API_KEY to be configured. Fields left blank for manual entry.",
       });
     }
 
@@ -52,11 +51,6 @@ export async function POST(req: NextRequest) {
       .filter(Boolean)
       .join(" | ")
       .slice(0, 2000);
-
-    const model = genAI.getGenerativeModel({
-      model: MODEL,
-      generationConfig: { temperature: 0, responseMimeType: "application/json" },
-    });
 
     const prompt = `Based ONLY on this scraped website content, guess:
 1. businessType: a short label (2-4 words), e.g. "Dental clinic", "SaaS product", "Coffee shop"
@@ -71,8 +65,32 @@ ${pageText}
 Respond with ONLY this JSON shape, no markdown:
 { "businessType": string, "productService": string, "location": string, "confidence": "high"|"medium"|"low" }`;
 
-    const result = await model.generateContent(prompt);
-    const cleaned = result.response.text().replace(/```json|```/g, "").trim();
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        temperature: 0,
+        response_format: { type: "json_object" },
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      return NextResponse.json({ error: `Groq API error (HTTP ${res.status}): ${errText.slice(0, 200)}` }, { status: 500 });
+    }
+
+    const data = await res.json();
+    const content: string | undefined = data.choices?.[0]?.message?.content;
+    if (!content) {
+      return NextResponse.json({ error: "No content in Groq response" }, { status: 500 });
+    }
+
+    const cleaned = content.replace(/```json|```/g, "").trim();
     const parsedGuess = JSON.parse(cleaned);
 
     return NextResponse.json(parsedGuess);
