@@ -65,16 +65,7 @@ export default function ReportDashboard({
               {report.input.websiteUrl}
             </p>
           </div>
-          {overallScore !== null && (
-            <div className="text-right">
-              <div className="font-data text-4xl" style={{ color: statusColor[overallScore >= 75 ? "good" : overallScore >= 45 ? "warning" : "critical"] }}>
-                {overallScore}
-              </div>
-              <div className="text-xs" style={{ color: "var(--ink-soft)" }}>
-                overall score
-              </div>
-            </div>
-          )}
+          {overallScore !== null && <ScoreGauge score={overallScore} />}
         </div>
 
         <div className="flex gap-3 mb-10">
@@ -178,32 +169,35 @@ export default function ReportDashboard({
             <div
               key={card.id}
               className="rounded-lg p-5"
-              style={{ background: "var(--paper-raised)", border: "1px solid var(--line)" }}
+              style={{
+                background: "var(--paper-raised)",
+                border: "1px solid var(--line)",
+                borderLeft: `4px solid ${statusColor[card.status]}`,
+                boxShadow: "0 1px 2px rgba(22,36,31,0.04)",
+              }}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 gap-3">
                 <h3 className="font-medium text-sm" style={{ color: "var(--ink)" }}>
                   {card.title}
                 </h3>
                 {card.score !== null ? (
-                  <span className="font-data text-xl" style={{ color: statusColor[card.status] }}>
+                  <span className="font-data text-xl flex-shrink-0" style={{ color: statusColor[card.status] }}>
                     {card.score}
+                    <span className="text-xs" style={{ color: "var(--ink-soft)" }}>/100</span>
                   </span>
                 ) : (
                   <span
-                    className="font-data text-xs uppercase px-2 py-1 rounded"
-                    style={{ color: statusColor[card.status], border: `1px solid ${statusColor[card.status]}` }}
-                  >
-                    {card.summary}
-                  </span>
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: statusColor[card.status] }}
+                    title={card.status}
+                  />
                 )}
               </div>
-              {card.score !== null && (
-                <p className="text-xs mb-2" style={{ color: "var(--ink-soft)" }}>
-                  {card.summary}
-                </p>
-              )}
+              <p className="text-xs mb-2" style={{ color: "var(--ink-soft)" }}>
+                {card.summary}
+              </p>
               <ul className="text-xs space-y-1" style={{ color: "var(--ink-soft)" }}>
-                {card.details.slice(0, 3).map((d, i) => (
+                {card.details.slice(0, 4).map((d, i) => (
                   <li key={i}>• {d}</li>
                 ))}
               </ul>
@@ -260,6 +254,49 @@ export default function ReportDashboard({
             </ul>
           </section>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ScoreGauge({ score }: { score: number }) {
+  const status = score >= 75 ? "good" : score >= 45 ? "warning" : "critical";
+  const color = statusColor[status];
+  // Semicircular gauge: 180° arc, radius 42, drawn as a stroke-dasharray fraction.
+  const radius = 42;
+  const circumference = Math.PI * radius; // half-circle length
+  const filled = (score / 100) * circumference;
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg width="104" height="62" viewBox="0 0 104 62">
+        <path
+          d="M 10 56 A 42 42 0 0 1 94 56"
+          fill="none"
+          stroke="var(--line)"
+          strokeWidth="8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 10 56 A 42 42 0 0 1 94 56"
+          fill="none"
+          stroke={color}
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={`${filled} ${circumference}`}
+        />
+        <text
+          x="52"
+          y="46"
+          textAnchor="middle"
+          className="font-data"
+          style={{ fontSize: "22px", fill: "var(--ink)", fontWeight: 600 }}
+        >
+          {score}
+        </text>
+      </svg>
+      <div className="text-xs -mt-1" style={{ color: "var(--ink-soft)" }}>
+        overall score
       </div>
     </div>
   );

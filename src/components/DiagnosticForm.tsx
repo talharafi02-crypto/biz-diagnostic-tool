@@ -99,14 +99,25 @@ export default function DiagnosticForm() {
     <div className="min-h-screen" style={{ background: "var(--paper)" }}>
       <div className="max-w-2xl mx-auto px-6 py-16">
         <header className="mb-10">
-          <p
-            className="font-data text-xs tracking-widest uppercase mb-3"
-            style={{ color: "var(--ink-soft)" }}
-          >
-            Business Marketing Diagnostic
-          </p>
-          <h1 className="font-display text-4xl leading-tight" style={{ color: "var(--ink)" }}>
-            A full checkup for your business's marketing.
+          <div className="flex items-center gap-3 mb-4">
+            <svg width="56" height="24" viewBox="0 0 56 24" fill="none" aria-hidden="true">
+              <path
+                d="M0 12H14L18 3L24 21L29 12H56"
+                stroke="var(--good)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <p
+              className="font-data text-xs tracking-widest uppercase"
+              style={{ color: "var(--ink-soft)" }}
+            >
+              Business Marketing Diagnostic
+            </p>
+          </div>
+          <h1 className="font-display text-5xl leading-tight" style={{ color: "var(--ink)" }}>
+            A full checkup for your business&apos;s marketing.
           </h1>
           <p className="mt-3 text-base" style={{ color: "var(--ink-soft)" }}>
             Enter your business details once. We pull live data from your website and
@@ -115,6 +126,10 @@ export default function DiagnosticForm() {
           </p>
         </header>
 
+        <div
+          className="rounded-xl p-8"
+          style={{ background: "var(--paper-raised)", border: "1px solid var(--line)", boxShadow: "0 1px 3px rgba(22,36,31,0.06)" }}
+        >
         <form onSubmit={handleSubmit} className="space-y-5">
           <Field label="Website URL" hint="We'll scan this and try to auto-fill the fields below">
             <input
@@ -216,6 +231,7 @@ export default function DiagnosticForm() {
             {loading ? "Running diagnostic — this takes about 30-60 seconds…" : "Run diagnostic"}
           </button>
         </form>
+        </div>
       </div>
 
       <style jsx global>{`

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /*
@@ -22,9 +23,9 @@
   --background: var(--paper);
   --foreground: var(--ink);
 
-  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
-  --font-body: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-data: "SF Mono", "Cascadia Code", "Roboto Mono", ui-monospace, monospace;
+  --font-display: "Newsreader", Georgia, "Iowan Old Style", serif;
+  --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-data: "IBM Plex Mono", "SF Mono", "Cascadia Code", ui-monospace, monospace;
 }
 
 @theme inline {
