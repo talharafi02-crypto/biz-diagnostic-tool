@@ -4,7 +4,7 @@
 
 export type BusinessStage = "idea" | "startup" | "growing" | "established";
 
-export type Budget = "low" | "medium" | "high"; // <$500/mo, $500-2000/mo, $2000+/mo
+export type Budget = "none" | "low" | "medium" | "high"; // $0, <$500/mo, $500-2000/mo, $2000+/mo
 
 export interface BusinessInput {
   businessType: string; // free text, e.g. "Dental Clinic", "SaaS", "Restaurant"

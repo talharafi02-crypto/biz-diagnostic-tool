@@ -41,6 +41,27 @@ const BUDGET_CHANNEL_MATRIX: Record<
   BusinessInput["budget"],
   Record<BusinessInput["businessStage"], ChannelAllocation[]>
 > = {
+  none: {
+    idea: [
+      { channel: "Cold email outreach", allocationPct: 60, rationale: "Zero cash cost, just time — best way to validate demand before spending anything." },
+      { channel: "Organic content / SEO groundwork", allocationPct: 40, rationale: "Free to start (your own time), builds a long-term asset while you have no budget yet." },
+    ],
+    startup: [
+      { channel: "Cold email outreach", allocationPct: 50, rationale: "The only channel that reliably generates leads with $0 spend." },
+      { channel: "Local marketing (Google Business Profile, community, referrals)", allocationPct: 30, rationale: "Free listings and word-of-mouth cost nothing but time." },
+      { channel: "SEO foundations", allocationPct: 20, rationale: "Free to implement yourself; pays off later even with no budget now." },
+    ],
+    growing: [
+      { channel: "SEO", allocationPct: 50, rationale: "With no spend available, doubling down on free organic search is the highest-leverage move." },
+      { channel: "Cold email outreach", allocationPct: 30, rationale: "Still free and direct — keep it running alongside SEO." },
+      { channel: "Local marketing", allocationPct: 20, rationale: "Free reputation-building in your existing service area." },
+    ],
+    established: [
+      { channel: "SEO", allocationPct: 55, rationale: "An established business with no marketing budget should lean hard on the organic presence it's already built." },
+      { channel: "Local marketing", allocationPct: 25, rationale: "Free reputation/referral channels matter even more without ad spend." },
+      { channel: "Content marketing", allocationPct: 20, rationale: "Costs time, not money — worth it if you have any in-house capacity." },
+    ],
+  },
   low: {
     idea: [
       { channel: "Organic content / SEO groundwork", allocationPct: 60, rationale: "No/low spend, compounding long-term asset while validating the idea." },

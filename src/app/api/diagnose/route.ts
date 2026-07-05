@@ -31,7 +31,7 @@ const inputSchema = z.object({
   businessType: z.string().min(2).max(120),
   productService: z.string().min(2).max(200),
   location: z.string().min(2).max(120),
-  budget: z.enum(["low", "medium", "high"]),
+  budget: z.enum(["none", "low", "medium", "high"]),
   businessStage: z.enum(["idea", "startup", "growing", "established"]),
   websiteUrl: z.string().url(),
 });

@@ -18,9 +18,50 @@ export default function DiagnosticForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<DiagnosticReport | null>(null);
+  const [detecting, setDetecting] = useState(false);
+  const [detectNote, setDetectNote] = useState<string | null>(null);
+  const [lastDetectedUrl, setLastDetectedUrl] = useState<string | null>(null);
 
   function update<K extends keyof BusinessInput>(key: K, value: BusinessInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  async function handleAutoDetect() {
+    let url = form.websiteUrl.trim();
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+    if (url === lastDetectedUrl) return; // already tried this exact URL
+
+    setDetecting(true);
+    setDetectNote(null);
+    try {
+      const res = await fetch("/api/autodetect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ websiteUrl: url }),
+      });
+      const data = await res.json();
+      setLastDetectedUrl(url);
+      if (!res.ok) {
+        setDetectNote("Couldn't auto-detect from this site — please fill the fields manually.");
+        return;
+      }
+      setForm((f) => ({
+        ...f,
+        businessType: data.businessType || f.businessType,
+        productService: data.productService || f.productService,
+        location: data.location || f.location,
+      }));
+      if (data.note) {
+        setDetectNote(data.note);
+      } else {
+        setDetectNote("Auto-filled from your website — please check these are correct before running the diagnostic.");
+      }
+    } catch {
+      setDetectNote("Couldn't auto-detect from this site — please fill the fields manually.");
+    } finally {
+      setDetecting(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -75,7 +116,29 @@ export default function DiagnosticForm() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <Field label="Business type" hint="e.g. Dental clinic, SaaS product, restaurant">
+          <Field label="Website URL" hint="We'll scan this and try to auto-fill the fields below">
+            <input
+              required
+              className="input"
+              value={form.websiteUrl}
+              onChange={(e) => update("websiteUrl", e.target.value)}
+              onBlur={handleAutoDetect}
+              placeholder="www.yourbusiness.com"
+            />
+          </Field>
+
+          {detecting && (
+            <p className="text-xs" style={{ color: "var(--ink-soft)" }}>
+              Reading your website to auto-fill the fields below…
+            </p>
+          )}
+          {detectNote && !detecting && (
+            <p className="text-xs" style={{ color: "var(--ink-soft)" }}>
+              {detectNote}
+            </p>
+          )}
+
+          <Field label="Business type" hint="e.g. Dental clinic, SaaS product, restaurant — auto-filled, edit if wrong">
             <input
               required
               className="input"
@@ -85,7 +148,7 @@ export default function DiagnosticForm() {
             />
           </Field>
 
-          <Field label="Product or service" hint="What do you actually sell?">
+          <Field label="Product or service" hint="What do you actually sell? — auto-filled, edit if wrong">
             <input
               required
               className="input"
@@ -95,7 +158,7 @@ export default function DiagnosticForm() {
             />
           </Field>
 
-          <Field label="Location" hint="City and country — used for local competition checks">
+          <Field label="Location" hint="City and country — auto-filled if detectable, edit if wrong">
             <input
               required
               className="input"
@@ -105,23 +168,14 @@ export default function DiagnosticForm() {
             />
           </Field>
 
-          <Field label="Website URL" hint="We'll run a live audit on this">
-            <input
-              required
-              className="input"
-              value={form.websiteUrl}
-              onChange={(e) => update("websiteUrl", e.target.value)}
-              placeholder="www.yourbusiness.com"
-            />
-          </Field>
-
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Monthly marketing budget">
+            <Field label="Monthly marketing investment" hint="Even if you're not spending anything yet">
               <select
                 className="input"
                 value={form.budget}
                 onChange={(e) => update("budget", e.target.value as BusinessInput["budget"])}
               >
+                <option value="none">Not spending anything right now</option>
                 <option value="low">Under $500/mo</option>
                 <option value="medium">$500 – $2,000/mo</option>
                 <option value="high">$2,000+/mo</option>
