@@ -38,5 +38,17 @@ export interface DiagnosticReport {
     reasoning: string;
     budgetFit: string;
   };
+  icp: {
+    summary: string;
+    demographics: string;
+    psychographics: string;
+    buyingTriggers: string;
+  } | null;
+  marketingStrategy: {
+    headline: string;
+    allocations: { channel: string; allocationPct: number; rationale: string }[];
+  };
+  aiAvailable: boolean;
+  aiError: string | null;
   raw: Record<string, unknown>; // raw fetched data, kept for debugging/audit trail
 }

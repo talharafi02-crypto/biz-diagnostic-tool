@@ -141,7 +141,7 @@ export function scoreLocalCompetition(result: LocalCompetitionResult): ScoreCard
   if (!result.checked || result.competitorCount === null) {
     return {
       id: "local-competition-density",
-      title: "Local Competition Density",
+      title: "Local Competition",
       score: null,
       status: "info",
       summary: "Could not measure local competition density.",
@@ -154,7 +154,7 @@ export function scoreLocalCompetition(result: LocalCompetitionResult): ScoreCard
 
   return {
     id: "local-competition-density",
-    title: "Local Competition Density",
+    title: "Local Competition",
     score,
     status: statusFromScore(score),
     summary: `${result.competitorCount} similar businesses found nearby — ${result.densityLevel} competition density.`,
@@ -180,7 +180,7 @@ export function scoreCompetitorIntel(result: CompetitorIntelResult): ScoreCard {
   if (!result.checked || result.competitors.length === 0) {
     return {
       id: "competitor-intelligence",
-      title: "Competitor Intelligence",
+      title: "How You Compare to Competitors",
       score: null,
       status: "info",
       summary: "Could not identify competitors automatically.",
@@ -196,7 +196,7 @@ export function scoreCompetitorIntel(result: CompetitorIntelResult): ScoreCard {
 
   return {
     id: "competitor-intelligence",
-    title: "Competitor Intelligence",
+    title: "How You Compare to Competitors",
     score: null,
     status: "info",
     summary: `Analyzed ${result.competitors.length} real competitors: avg ${avgTrust.toFixed(
@@ -219,7 +219,7 @@ export function scoreSeasonalDemand(result: SeasonalDemandResult): ScoreCard {
   if (!result.checked) {
     return {
       id: "seasonal-demand",
-      title: "Seasonal Demand Timing",
+      title: "Best Months to Market",
       score: null,
       status: "info",
       summary: "Could not determine seasonal demand pattern.",
@@ -230,7 +230,7 @@ export function scoreSeasonalDemand(result: SeasonalDemandResult): ScoreCard {
 
   return {
     id: "seasonal-demand",
-    title: "Seasonal Demand Timing",
+    title: "Best Months to Market",
     score: null,
     status: "info",
     summary: `Demand pattern: ${result.volatility}. Peak interest: ${result.peakMonths.join(", ")}. Lowest interest: ${result.lowMonths.join(", ")}.`,
@@ -247,20 +247,30 @@ export function scoreSeasonalDemand(result: SeasonalDemandResult): ScoreCard {
   };
 }
 
-export function scoreBudgetChannelMapping(input: BusinessInput): ScoreCard {
+export interface MarketingStrategy {
+  headline: string;
+  allocations: ChannelAllocation[];
+}
+
+/**
+ * Returns the deterministic budget/stage-based channel plan as structured
+ * data — rendered as its own "Recommended Marketing Strategy" section in
+ * the dashboard/PDF, not buried as a generic scorecard.
+ */
+export function getMarketingStrategy(input: BusinessInput): MarketingStrategy {
   const allocations = BUDGET_CHANNEL_MATRIX[input.budget][input.businessStage];
-  const summary = `Recommended mix for a ${input.budget} budget at ${input.businessStage} stage: ${allocations
-    .map((a) => `${a.channel} (${a.allocationPct}%)`)
-    .join(", ")}.`;
+  const budgetLabel =
+    input.budget === "none"
+      ? "no budget yet"
+      : input.budget === "low"
+      ? "a budget under $500/month"
+      : input.budget === "medium"
+      ? "a $500-2,000/month budget"
+      : "a $2,000+/month budget";
 
   return {
-    id: "budget-channel-mapping",
-    title: "Budget-to-Channel Mapping",
-    score: null,
-    status: "info",
-    summary,
-    details: allocations.map((a) => `${a.channel} — ${a.allocationPct}% — ${a.rationale}`),
-    source: "rule-engine",
+    headline: `With ${budgetLabel} at the "${input.businessStage}" stage, here's where every dollar (or hour) should go:`,
+    allocations,
   };
 }
 
@@ -425,7 +435,7 @@ export function scoreSeoSnapshot(ps: PageSpeedResult, site: ScrapedSite): ScoreC
 
   return {
     id: "seo-snapshot",
-    title: "SEO Snapshot",
+    title: "Search Engine Visibility (SEO)",
     score,
     status: statusFromScore(score),
     summary:
@@ -651,7 +661,7 @@ export function scoreFriction(site: ScrapedSite): ScoreCard {
 
   return {
     id: "friction-points",
-    title: "Website-to-Sale Friction Points",
+    title: "What's Stopping Visitors From Buying",
     score,
     status: statusFromScore(score),
     summary:
@@ -695,7 +705,7 @@ export function scoreGrowthStageMismatch(input: BusinessInput, site: ScrapedSite
 
   return {
     id: "growth-stage-mismatch",
-    title: "Growth Stage Mismatch Warning",
+    title: "Is Your Website Ready for This Stage?",
     score,
     status: mismatch ? "warning" : "good",
     summary: mismatch ? "Website and business stage don't align." : "Website matches the stated business stage.",

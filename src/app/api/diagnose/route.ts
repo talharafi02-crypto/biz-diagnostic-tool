@@ -20,7 +20,7 @@ import {
   scoreLocalCompetition,
   scoreCompetitorIntel,
   scoreSeasonalDemand,
-  scoreBudgetChannelMapping,
+  getMarketingStrategy,
 } from "@/lib/ruleEngine";
 import { synthesizeWithAi } from "@/lib/aiSynthesis";
 import { DiagnosticReport, ScoreCard } from "@/lib/types";
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
   const localCompetitionCard = scoreLocalCompetition(localCompetition);
   const competitorIntelCard = scoreCompetitorIntel(competitorIntel);
   const seasonalDemandCard = scoreSeasonalDemand(seasonalDemand);
-  const budgetChannelCard = scoreBudgetChannelMapping(input);
+  const marketingStrategy = getMarketingStrategy(input);
 
   const factCards: ScoreCard[] = [
     domainHealthCard,
@@ -89,7 +89,6 @@ export async function POST(req: NextRequest) {
     localCompetitionCard,
     competitorIntelCard,
     seasonalDemandCard,
-    budgetChannelCard,
   ];
 
   // Step 3: AI synthesis — reasoning only, fed the already-final facts above
@@ -150,9 +149,13 @@ export async function POST(req: NextRequest) {
     avoidList: aiResult?.avoidList ?? [],
     recommendedChannel: aiResult?.recommendedChannel ?? {
       channel: "N/A",
-      reasoning: aiError ?? "AI synthesis unavailable",
+      reasoning: "AI-powered recommendations could not be generated for this report — see the notice above.",
       budgetFit: "N/A",
     },
+    icp: aiResult?.icp ?? null,
+    marketingStrategy,
+    aiAvailable: !!aiResult,
+    aiError,
     raw: { ssl, domainAge, blacklist, pagespeed, site, localCompetition, competitorIntel, seasonalDemand, aiError },
   };
 

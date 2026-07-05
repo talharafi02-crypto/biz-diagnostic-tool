@@ -48,7 +48,11 @@ export async function checkLocalCompetition(
 
     const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
       method: "POST",
-      headers: { "Content-Type": "text/plain" },
+      headers: {
+        "Content-Type": "text/plain",
+        Accept: "application/json",
+        "User-Agent": "BusinessMarketingDiagnosticTool/1.0 (student FYP project)",
+      },
       body: overpassQuery,
     });
 

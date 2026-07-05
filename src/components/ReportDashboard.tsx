@@ -95,13 +95,44 @@ export default function ReportDashboard({
           </button>
         </div>
 
+        {!report.aiAvailable && (
+          <div
+            className="rounded-md px-4 py-3 mb-8 text-sm"
+            style={{ background: "#fff3cd", color: "#7a5c00", border: "1px solid #f0d98c" }}
+          >
+            <strong>AI-powered recommendations (ICP, strategy reasoning, roadmap) couldn&apos;t be generated for this report.</strong>
+            <br />
+            Reason: {report.aiError || "Unknown error"}
+            <br />
+            All the live-data scorecards below are unaffected — this only affects the AI-written sections. If this
+            keeps happening, double check the <code>GEMINI_API_KEY</code> in your deployment settings.
+          </div>
+        )}
+
+        {report.icp && (
+          <section
+            className="rounded-lg p-6 mb-8"
+            style={{ background: "var(--paper-raised)", border: "1px solid var(--line)" }}
+          >
+            <p className="font-data text-xs uppercase tracking-widest mb-2" style={{ color: "var(--good)" }}>
+              Ideal customer profile
+            </p>
+            <p className="text-sm mb-3" style={{ color: "var(--ink)" }}>{report.icp.summary}</p>
+            <div className="grid sm:grid-cols-3 gap-4 text-xs" style={{ color: "var(--ink-soft)" }}>
+              <div><span className="font-medium" style={{ color: "var(--ink)" }}>Who they are: </span>{report.icp.demographics}</div>
+              <div><span className="font-medium" style={{ color: "var(--ink)" }}>What drives them: </span>{report.icp.psychographics}</div>
+              <div><span className="font-medium" style={{ color: "var(--ink)" }}>What triggers buying: </span>{report.icp.buyingTriggers}</div>
+            </div>
+          </section>
+        )}
+
         {report.recommendedChannel.channel !== "N/A" && (
           <section
             className="rounded-lg p-6 mb-8"
             style={{ background: "var(--paper-raised)", border: "1px solid var(--line)" }}
           >
             <p className="font-data text-xs uppercase tracking-widest mb-2" style={{ color: "var(--good)" }}>
-              Recommended channel
+              Recommended primary channel
             </p>
             <h2 className="font-display text-2xl mb-2" style={{ color: "var(--ink)" }}>
               {report.recommendedChannel.channel}
@@ -114,6 +145,33 @@ export default function ReportDashboard({
             </p>
           </section>
         )}
+
+        <section
+          className="rounded-lg p-6 mb-10"
+          style={{ background: "var(--paper-raised)", border: "1px solid var(--line)" }}
+        >
+          <p className="font-data text-xs uppercase tracking-widest mb-2" style={{ color: "var(--good)" }}>
+            Recommended marketing strategy
+          </p>
+          <p className="text-sm mb-4" style={{ color: "var(--ink)" }}>{report.marketingStrategy.headline}</p>
+          <div className="space-y-3">
+            {report.marketingStrategy.allocations.map((a, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="font-data text-lg w-14 text-right" style={{ color: "var(--good)" }}>
+                  {a.allocationPct}%
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium" style={{ color: "var(--ink)" }}>{a.channel}</div>
+                  <div className="text-xs" style={{ color: "var(--ink-soft)" }}>{a.rationale}</div>
+                </div>
+                <div
+                  className="h-2 rounded-full flex-shrink-0"
+                  style={{ width: `${Math.max(a.allocationPct, 8)}px`, background: "var(--good)" }}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="grid sm:grid-cols-2 gap-4 mb-10">
           {report.cards.map((card) => (

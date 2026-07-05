@@ -54,6 +54,25 @@ function ReportDocument({ report }: { report: DiagnosticReport }) {
           {overallScore !== null ? ` · Overall score: ${overallScore}/100` : ""}
         </Text>
 
+        {!report.aiAvailable && (
+          <View style={[styles.card, { borderColor: "#e8c568", backgroundColor: "#fff8e6" }]}>
+            <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 9, color: "#7a5c00" }}>
+              AI-powered sections (ICP, strategy reasoning, roadmap) could not be generated for this report.
+            </Text>
+            <Text style={styles.detail}>Reason: {report.aiError || "Unknown error"}</Text>
+          </View>
+        )}
+
+        {report.icp && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Ideal Customer Profile</Text>
+            <Text style={styles.cardSummary}>{report.icp.summary}</Text>
+            <Text style={styles.detail}>Who they are: {report.icp.demographics}</Text>
+            <Text style={styles.detail}>What drives them: {report.icp.psychographics}</Text>
+            <Text style={styles.detail}>Buying triggers: {report.icp.buyingTriggers}</Text>
+          </View>
+        )}
+
         {report.recommendedChannel.channel !== "N/A" && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Recommended Channel: {report.recommendedChannel.channel}</Text>
@@ -61,6 +80,15 @@ function ReportDocument({ report }: { report: DiagnosticReport }) {
             <Text style={styles.detail}>Budget fit: {report.recommendedChannel.budgetFit}</Text>
           </View>
         )}
+
+        <Text style={styles.sectionTitle}>Recommended Marketing Strategy</Text>
+        <Text style={styles.cardSummary}>{report.marketingStrategy.headline}</Text>
+        {report.marketingStrategy.allocations.map((a, i) => (
+          <View key={i} style={styles.card} wrap={false}>
+            <Text style={styles.cardTitle}>{a.allocationPct}% — {a.channel}</Text>
+            <Text style={styles.detail}>{a.rationale}</Text>
+          </View>
+        ))}
 
         <Text style={styles.sectionTitle}>Diagnostic Scorecards</Text>
         {report.cards.map((card) => (
