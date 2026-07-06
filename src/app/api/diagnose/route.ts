@@ -5,6 +5,7 @@ import { checkDomainAge } from "@/lib/apis/domainAge";
 import { checkBlacklist } from "@/lib/apis/blacklist";
 import { checkPageSpeed } from "@/lib/apis/pagespeed";
 import { scrapeSite } from "@/lib/apis/scraper";
+import { checkTechnicalSeo } from "@/lib/apis/technicalSeo";
 import { checkLocalCompetition } from "@/lib/apis/localCompetition";
 import { checkCompetitorIntel } from "@/lib/apis/competitorIntel";
 import { checkSeasonalDemand } from "@/lib/apis/seasonalDemand";
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest) {
   const hostname = new URL(input.websiteUrl).hostname;
 
   // Step 1: run all independent live checks in parallel (fast + no shared state)
-  const [ssl, domainAge, blacklist, pagespeed, site, localCompetition, competitorIntel, seasonalDemand] =
+  const [ssl, domainAge, blacklist, pagespeed, site, localCompetition, competitorIntel, seasonalDemand, technicalSeo] =
     await Promise.all([
       checkSsl(hostname),
       checkDomainAge(hostname),
@@ -61,12 +62,13 @@ export async function POST(req: NextRequest) {
       checkLocalCompetition(input.businessType, input.location),
       checkCompetitorIntel(input.businessType, input.location, hostname),
       checkSeasonalDemand(input.businessType),
+      checkTechnicalSeo(input.websiteUrl),
     ]);
 
   // Step 2: deterministic rule-engine scoring, built only from the facts above
   const domainHealthCard = scoreDomainHealth(ssl, blacklist, domainAge);
   const mobileCard = scoreMobileExperience(pagespeed);
-  const seoCard = scoreSeoSnapshot(pagespeed, site);
+  const seoCard = scoreSeoSnapshot(pagespeed, site, technicalSeo);
   const websiteAuditCard = scoreWebsiteAudit(site);
   const firstImpressionCard = scoreFirstImpression(pagespeed, site, ssl);
   const trustCard = scoreTrustCredibility(site, ssl, blacklist);
@@ -91,7 +93,7 @@ export async function POST(req: NextRequest) {
     seasonalDemandCard,
   ];
 
-  // Step 3: AI synthesis — reasoning only, fed the already-final facts above
+  // Step 3: AI synthesis - reasoning only, fed the already-final facts above
   let aiResult;
   let aiError: string | null = null;
   try {
@@ -149,14 +151,14 @@ export async function POST(req: NextRequest) {
     avoidList: aiResult?.avoidList ?? [],
     recommendedChannel: aiResult?.recommendedChannel ?? {
       channel: "N/A",
-      reasoning: "AI-powered recommendations could not be generated for this report — see the notice above.",
+      reasoning: "AI-powered recommendations could not be generated for this report - see the notice above.",
       budgetFit: "N/A",
     },
     icp: aiResult?.icp ?? null,
     marketingStrategy,
     aiAvailable: !!aiResult,
     aiError,
-    raw: { ssl, domainAge, blacklist, pagespeed, site, localCompetition, competitorIntel, seasonalDemand, aiError },
+    raw: { ssl, domainAge, blacklist, pagespeed, site, localCompetition, competitorIntel, seasonalDemand, technicalSeo, aiError },
   };
 
   return NextResponse.json(report);

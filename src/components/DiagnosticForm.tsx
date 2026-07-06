@@ -43,7 +43,7 @@ export default function DiagnosticForm() {
       const data = await res.json();
       setLastDetectedUrl(url);
       if (!res.ok) {
-        setDetectNote("Couldn't auto-detect from this site — please fill the fields manually.");
+        setDetectNote("Couldn't auto-detect from this site - please fill the fields manually.");
         return;
       }
       setForm((f) => ({
@@ -51,14 +51,15 @@ export default function DiagnosticForm() {
         businessType: data.businessType || f.businessType,
         productService: data.productService || f.productService,
         location: data.location || f.location,
+        businessStage: (data.businessStage as BusinessInput["businessStage"]) || f.businessStage,
       }));
       if (data.note) {
         setDetectNote(data.note);
       } else {
-        setDetectNote("Auto-filled from your website — please check these are correct before running the diagnostic.");
+        setDetectNote("Auto-filled from your website - please check these are correct before running the diagnostic.");
       }
     } catch {
-      setDetectNote("Couldn't auto-detect from this site — please fill the fields manually.");
+      setDetectNote("Couldn't auto-detect from this site - please fill the fields manually.");
     } finally {
       setDetecting(false);
     }
@@ -122,7 +123,7 @@ export default function DiagnosticForm() {
           <p className="mt-3 text-base" style={{ color: "var(--ink-soft)" }}>
             Enter your business details once. We pull live data from your website and
             the web, run it through a fixed diagnostic checklist, and hand you a clear,
-            repeatable report — not a guess.
+            repeatable report - not a guess.
           </p>
         </header>
 
@@ -153,7 +154,7 @@ export default function DiagnosticForm() {
             </p>
           )}
 
-          <Field label="Business type" hint="e.g. Dental clinic, SaaS product, restaurant — auto-filled, edit if wrong">
+          <Field label="Business type" hint="e.g. Dental clinic, SaaS product, restaurant - auto-filled, edit if wrong">
             <input
               required
               className="input"
@@ -163,7 +164,7 @@ export default function DiagnosticForm() {
             />
           </Field>
 
-          <Field label="Product or service" hint="What do you actually sell? — auto-filled, edit if wrong">
+          <Field label="Product or service" hint="What do you actually sell? - auto-filled, edit if wrong">
             <input
               required
               className="input"
@@ -173,7 +174,7 @@ export default function DiagnosticForm() {
             />
           </Field>
 
-          <Field label="Location" hint="City and country — auto-filled if detectable, edit if wrong">
+          <Field label="Location" hint="City and country - auto-filled if detectable, edit if wrong">
             <input
               required
               className="input"
@@ -184,7 +185,7 @@ export default function DiagnosticForm() {
           </Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Monthly marketing investment" hint="Even if you're not spending anything yet">
+            <Field label="Monthly marketing investment" hint="This is your own decision, so it can't be auto detected">
               <select
                 className="input"
                 value={form.budget}
@@ -192,12 +193,12 @@ export default function DiagnosticForm() {
               >
                 <option value="none">Not spending anything right now</option>
                 <option value="low">Under $500/mo</option>
-                <option value="medium">$500 – $2,000/mo</option>
+                <option value="medium">$500 to $2,000/mo</option>
                 <option value="high">$2,000+/mo</option>
               </select>
             </Field>
 
-            <Field label="Business stage">
+            <Field label="Business stage" hint="Auto-filled from your website, edit if wrong">
               <select
                 className="input"
                 value={form.businessStage}
@@ -228,7 +229,7 @@ export default function DiagnosticForm() {
             className="w-full py-3 rounded-md font-data text-sm tracking-wide uppercase transition-opacity disabled:opacity-60"
             style={{ background: "var(--ink)", color: "var(--paper-raised)" }}
           >
-            {loading ? "Running diagnostic — this takes about 30-60 seconds…" : "Run diagnostic"}
+            {loading ? "Running diagnostic - this takes about 30-60 seconds…" : "Run diagnostic"}
           </button>
         </form>
         </div>

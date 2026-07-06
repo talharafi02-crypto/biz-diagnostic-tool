@@ -6,7 +6,7 @@ export interface BlacklistResult {
 }
 
 /**
- * Google Safe Browsing "lookup" API — free, no cost tier for reasonable
+ * Google Safe Browsing "lookup" API - free, no cost tier for reasonable
  * volume. Returns real threat matches for a URL (malware, phishing, unwanted
  * software). Requires GOOGLE_SAFE_BROWSING_API_KEY in env.
  */

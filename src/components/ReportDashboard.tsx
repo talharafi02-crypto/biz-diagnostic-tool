@@ -56,7 +56,7 @@ export default function ReportDashboard({
               className="font-data text-xs tracking-widest uppercase mb-2"
               style={{ color: "var(--ink-soft)" }}
             >
-              Diagnostic report — {new Date(report.generatedAt).toLocaleDateString()}
+              Diagnostic report - {new Date(report.generatedAt).toLocaleDateString()}
             </p>
             <h1 className="font-display text-3xl" style={{ color: "var(--ink)" }}>
               {report.input.businessType}
@@ -95,7 +95,7 @@ export default function ReportDashboard({
             <br />
             Reason: {report.aiError || "Unknown error"}
             <br />
-            All the live-data scorecards below are unaffected — this only affects the AI-written sections. If this
+            All the live-data scorecards below are unaffected - this only affects the AI-written sections. If this
             keeps happening, double check the <code>GROQ_API_KEY</code> in your deployment settings.
           </div>
         )}

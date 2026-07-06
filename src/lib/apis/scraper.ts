@@ -25,6 +25,9 @@ export interface ScrapedSite {
   hasAboutPage: boolean;
   imageCount: number;
   imagesWithAlt: number;
+  hasCanonical: boolean;
+  hasStructuredData: boolean;
+  structuredDataTypes: string[];
   error: string | null;
 }
 
@@ -39,7 +42,7 @@ const SECURITY_BADGE_PATTERNS = /\b(ssl secure|secure checkout|money[- ]back gua
 
 /**
  * Fetches the live HTML and extracts structural, rule-based signals.
- * No AI guessing here — every field is a deterministic regex/DOM check, so
+ * No AI guessing here - every field is a deterministic regex/DOM check, so
  * the same page always produces the same extraction, which is what feeds
  * the deterministic scoring layer downstream.
  */
@@ -80,6 +83,15 @@ export async function scrapeSite(url: string): Promise<ScrapedSite> {
     const clickableTexts = $("a, button")
       .map((_, el) => $(el).text().trim())
       .get()
+      .filter(Boolean)
+      // Strip emoji so downstream reports stay plain-text/professional even
+      // when the audited site's own buttons use them.
+      .map((t) =>
+        t
+          .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu, "")
+          .replace(/\s+/g, " ")
+          .trim()
+      )
       .filter(Boolean);
     const ctaButtons = [...new Set(clickableTexts.filter((t) => CTA_PATTERNS.test(t)))];
 
@@ -100,6 +112,23 @@ export async function scrapeSite(url: string): Promise<ScrapedSite> {
     const images = $("img");
     const imageCount = images.length;
     const imagesWithAlt = images.filter((_, el) => !!$(el).attr("alt")?.trim()).length;
+
+    const hasCanonical = $('link[rel="canonical"]').length > 0;
+
+    const structuredDataTypes: string[] = [];
+    $('script[type="application/ld+json"]').each((_, el) => {
+      try {
+        const parsed = JSON.parse($(el).contents().text());
+        const items = Array.isArray(parsed) ? parsed : [parsed];
+        for (const item of items) {
+          if (item && typeof item === "object" && "@type" in item) {
+            structuredDataTypes.push(String((item as { "@type": unknown })["@type"]));
+          }
+        }
+      } catch {
+        // malformed JSON-LD on the target site, ignore and move on
+      }
+    });
 
     return {
       fetched: true,
@@ -126,6 +155,9 @@ export async function scrapeSite(url: string): Promise<ScrapedSite> {
       hasAboutPage,
       imageCount,
       imagesWithAlt,
+      hasCanonical,
+      hasStructuredData: structuredDataTypes.length > 0,
+      structuredDataTypes: [...new Set(structuredDataTypes)],
       error: null,
     };
   } catch (e) {
@@ -159,6 +191,9 @@ function emptyResult(fetched: boolean, statusCode: number | null, error: string)
     hasAboutPage: false,
     imageCount: 0,
     imagesWithAlt: 0,
+    hasCanonical: false,
+    hasStructuredData: false,
+    structuredDataTypes: [],
     error,
   };
 }

@@ -7,7 +7,7 @@ export interface LocalCompetitionResult {
 }
 
 /**
- * FREE, NO-KEY VERSION — uses OpenStreetMap (Nominatim for geocoding the
+ * FREE, NO-KEY VERSION - uses OpenStreetMap (Nominatim for geocoding the
  * location, Overpass API for counting nearby businesses of the same type).
  * No account, no card, no API key, no signup required at all.
  * We keep requests light (1 geocode + 1 Overpass query) to stay within
@@ -32,7 +32,7 @@ export async function checkLocalCompetition(
     }
     const { lat, lon } = geoData[0];
 
-    // Step 2: Overpass query — search a 3km radius for named places, then
+    // Step 2: Overpass query - search a 3km radius for named places, then
     // keyword-match against the business type (best-effort free-text match
     // against OSM tags).
     const radiusMeters = 3000;
@@ -63,7 +63,7 @@ export async function checkLocalCompetition(
     const overpassData = await overpassRes.json();
     const elements: { tags?: Record<string, string> }[] = overpassData.elements ?? [];
 
-    // Keep only places whose OSM tags plausibly match the business type —
+    // Keep only places whose OSM tags plausibly match the business type -
     // fixed substring match, so results are reproducible for the same input.
     const keywordTokens = keyword.split(/\s+/).filter((t) => t.length > 2);
     const matches = elements.filter((el) => {

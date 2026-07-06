@@ -48,7 +48,7 @@ function ReportDocument({ report }: { report: DiagnosticReport }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>{report.input.businessType} — Marketing Diagnostic</Text>
+        <Text style={styles.title}>{report.input.businessType} - Marketing Diagnostic</Text>
         <Text style={styles.subtitle}>
           {report.input.websiteUrl} · Generated {new Date(report.generatedAt).toLocaleDateString()}
           {overallScore !== null ? ` · Overall score: ${overallScore}/100` : ""}
@@ -85,7 +85,7 @@ function ReportDocument({ report }: { report: DiagnosticReport }) {
         <Text style={styles.cardSummary}>{report.marketingStrategy.headline}</Text>
         {report.marketingStrategy.allocations.map((a, i) => (
           <View key={i} style={styles.card} wrap={false}>
-            <Text style={styles.cardTitle}>{a.allocationPct}% — {a.channel}</Text>
+            <Text style={styles.cardTitle}>{a.allocationPct}% - {a.channel}</Text>
             <Text style={styles.detail}>{a.rationale}</Text>
           </View>
         ))}

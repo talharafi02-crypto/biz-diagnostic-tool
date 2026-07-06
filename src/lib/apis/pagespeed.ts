@@ -10,7 +10,7 @@ export interface PageSpeedResult {
 }
 
 /**
- * PageSpeed Insights v5 — free (240 req/day without a key, much higher with
+ * PageSpeed Insights v5 - free (240 req/day without a key, much higher with
  * a free Google Cloud API key). Runs a real Lighthouse audit on the live
  * page. This is the same engine Google Search Console uses, so it's a
  * credible, deterministic source (repeat runs vary only by real-world

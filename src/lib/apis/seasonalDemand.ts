@@ -16,7 +16,7 @@ const MONTH_NAMES = [
 
 /**
  * Google Trends is free and needs no API key, but it is an unofficial
- * endpoint (no SLA from Google) — so this module is always wrapped
+ * endpoint (no SLA from Google) - so this module is always wrapped
  * defensively and the report never blocks or crashes if it's unavailable.
  * We pull the last 12 months of interest-over-time for the search term
  * and bucket it deterministically: same 12-month window + same term will
@@ -63,7 +63,7 @@ export async function checkSeasonalDemand(searchTerm: string): Promise<SeasonalD
       .filter((m) => m.v <= min * 1.1 + 0.01)
       .map((m) => MONTH_NAMES[m.i]);
 
-    // Fixed thresholds on the min-max range (0-100 scale from Trends) —
+    // Fixed thresholds on the min-max range (0-100 scale from Trends) -
     // deterministic bucketing, not a judgment call made per-run.
     const volatility: SeasonalDemandResult["volatility"] =
       range < 15 ? "stable" : range < 40 ? "seasonal" : "highly-seasonal";

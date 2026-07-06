@@ -3,7 +3,7 @@ import { BusinessInput, ScoreCard } from "./types";
 /**
  * DETERMINISM STRATEGY FOR THE AI LAYER
  * ------------------------------------------------------------------
- * 1. temperature: 0 — as close to deterministic as the API allows.
+ * 1. temperature: 0 - as close to deterministic as the API allows.
  *    Note (be honest with the client/examiner): even at temperature 0,
  *    LLM APIs do not give a byte-for-byte guarantee of identical output
  *    on every call (server-side batching/floating point effects can
@@ -19,10 +19,10 @@ import { BusinessInput, ScoreCard } from "./types";
  *    to parse free-form prose.
  *
  * WHY GROQ, NOT GEMINI: Google AI Studio's free tier turned out to be
- * region-restricted — it silently sets a 0-request quota for accounts in
+ * region-restricted - it silently sets a 0-request quota for accounts in
  * some countries (this project hit that wall from Pakistan). Groq's free
  * tier has no such restriction and needs no credit card. Swap providers
- * again later by editing just this file — the rest of the app (rule
+ * again later by editing just this file - the rest of the app (rule
  * engine, scoring, PDF) doesn't know or care which LLM wrote the prose.
  */
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -63,13 +63,15 @@ export async function synthesizeWithAi(
   const systemPrompt = `You are a senior marketing consultant with 15 years of experience across small businesses, producing a structured diagnostic for a real business owner who is paying for this report.
 You will be given FIXED, already-computed facts and scores about a business and its website.
 Rules you must follow exactly:
-1. Never invent or change any numeric score for domain/SEO/website/mobile/trust/friction — those are already final and given to you.
-2. You MAY assign a 0-100 "brandConsistency" score yourself, but base it strictly on the facts given (title/messaging clarity, trust signal consistency) and briefly justify it — keep your reasoning consistent and repeatable for the same facts.
+1. Never invent or change any numeric score for domain/SEO/website/mobile/trust/friction - those are already final and given to you.
+2. You MAY assign a 0-100 "brandConsistency" score yourself, but base it strictly on the facts given (title/messaging clarity, trust signal consistency) and briefly justify it - keep your reasoning consistent and repeatable for the same facts.
 3. Respond with ONLY valid JSON matching the exact schema you are given. No markdown, no prose outside the JSON, no code fences.
 4. SPECIFICITY IS MANDATORY. Never write generic advice that could apply to any business (e.g. "improve your SEO", "post on social media more"). Every sentence must reference this specific business's type, location, product, or one of the computed facts by name. A reader should immediately know this report couldn't have been written about a different business.
-5. Roadmap actions must be concrete and doable within the stated budget — name the actual tool, platform, or tactic (e.g. "Add a WhatsApp click-to-chat button since 73% of X's local customers browse on mobile" not "improve customer contact options").
-6. Be honest and direct — if the data suggests the business isn't ready for a channel (e.g. paid ads with no budget), say so plainly and explain the real reason from the facts, not a hedge.
-7. Write like a consultant talking to the owner across a table, not like marketing copy. No buzzwords, no filler adjectives ("robust", "leverage", "synergy").`;
+5. Roadmap actions must be concrete and doable within the stated budget - name the actual tool, platform, or tactic (e.g. "Add a WhatsApp click-to-chat button since 73% of X's local customers browse on mobile" not "improve customer contact options").
+6. Be honest and direct - if the data suggests the business isn't ready for a channel (e.g. paid ads with no budget), say so plainly and explain the real reason from the facts, not a hedge.
+7. Write like a consultant talking to the owner across a table, not like marketing copy. No buzzwords, no filler adjectives ("robust", "leverage", "synergy").
+8. Never use an em-dash character. Use a period, comma, or colon instead.
+9. Never use emojis or symbols of any kind in your writing.`;
 
   const userPrompt = `BUSINESS INPUT:
 - Business type: ${input.businessType}

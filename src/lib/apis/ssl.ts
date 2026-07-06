@@ -11,7 +11,7 @@ export interface SslResult {
 
 /**
  * Connects directly to the domain on port 443 and inspects the real
- * certificate. No API key, no third party — this is a live, deterministic
+ * certificate. No API key, no third party - this is a live, deterministic
  * check: same domain + same cert state = same result every time.
  */
 export function checkSsl(hostname: string, timeoutMs = 8000): Promise<SslResult> {

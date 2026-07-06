@@ -16,12 +16,12 @@ export interface CompetitorIntelResult {
 }
 
 /**
- * FREE, NO-KEY VERSION — uses DuckDuckGo's public HTML search results page
+ * FREE, NO-KEY VERSION - uses DuckDuckGo's public HTML search results page
  * (no account, no API key, no card) to find real competitor websites, then
  * reuses the SAME deterministic scraper used for the main site so the
  * comparison is apples-to-apples.
  * Note: this is an unofficial method (no official free DuckDuckGo API
- * exists) — kept deliberately lightweight (1 search, top 3 results) to
+ * exists) - kept deliberately lightweight (1 search, top 3 results) to
  * stay respectful of their servers. If DuckDuckGo ever blocks/changes
  * this page, this module fails gracefully (see catch block) rather than
  * breaking the rest of the report.
