@@ -29,7 +29,7 @@ export async function checkPageSpeed(
       `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
         url
       )}&strategy=${strategy}&category=performance&category=seo&category=accessibility&category=best-practices${keyParam}`,
-      { signal: AbortSignal.timeout(30000) } // Lighthouse audits are slow
+      { signal: AbortSignal.timeout(7000) } // capped well under the 10s serverless function limit; falls back gracefully if Google is slow
     );
 
     if (!res.ok) {

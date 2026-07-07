@@ -54,7 +54,7 @@ export async function scrapeSite(url: string): Promise<ScrapedSite> {
           "Mozilla/5.0 (compatible; BizDiagnosticBot/1.0; +https://example.com/bot)",
       },
       redirect: "follow",
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(7000),
     });
 
     const statusCode = res.status;

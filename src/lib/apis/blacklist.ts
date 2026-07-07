@@ -41,7 +41,7 @@ export async function checkBlacklist(url: string): Promise<BlacklistResult> {
             threatEntries: [{ url }],
           },
         }),
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(6000),
       }
     );
 

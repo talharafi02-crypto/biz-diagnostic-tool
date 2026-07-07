@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { scrapeSite, ScrapedSite } from "./scraper";
+import { scrapeSite } from "./scraper";
 
 export interface CompetitorSummary {
   name: string;
@@ -35,6 +35,7 @@ export async function checkCompetitorIntel(
     const query = encodeURIComponent(`${businessType} ${location}`);
     const searchRes = await fetch(`https://html.duckduckgo.com/html/?q=${query}`, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; BusinessMarketingDiagnosticTool/1.0)" },
+      signal: AbortSignal.timeout(5000),
     });
 
     if (!searchRes.ok) {
@@ -61,14 +62,18 @@ export async function checkCompetitorIntel(
 
     const topCandidates = candidates.slice(0, 3);
 
+    // Scrape all candidates IN PARALLEL, not one at a time. Sequential
+    // scraping here used to be able to take up to 3x a single scrape's
+    // timeout, which alone could blow past a serverless function's time
+    // limit. Promise.allSettled means one slow/broken competitor site
+    // never blocks the others.
+    const results = await Promise.allSettled(topCandidates.map((c) => scrapeSite(c.url)));
+
     const competitors: CompetitorSummary[] = [];
-    for (const c of topCandidates) {
-      let scraped: ScrapedSite;
-      try {
-        scraped = await scrapeSite(c.url);
-      } catch {
-        continue;
-      }
+    results.forEach((result, i) => {
+      if (result.status !== "fulfilled" || !result.value.fetched) return;
+      const scraped = result.value;
+      const c = topCandidates[i];
       const trustSignalCount = Object.values(scraped.trustSignals).filter(Boolean).length;
       competitors.push({
         name: c.title || c.url,
@@ -77,7 +82,7 @@ export async function checkCompetitorIntel(
         trustSignalCount,
         hasBlogOrContent: scraped.wordCount > 600,
       });
-    }
+    });
 
     if (competitors.length === 0) {
       return { checked: false, competitors: [], error: "No usable competitor results found" };

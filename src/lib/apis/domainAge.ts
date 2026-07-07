@@ -17,7 +17,7 @@ export async function checkDomainAge(hostname: string): Promise<DomainAgeResult>
     const res = await fetch(`https://rdap.org/domain/${bareDomain}`, {
       headers: { Accept: "application/rdap+json" },
       // RDAP lookups can be slow for some TLDs
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(6000),
     });
 
     if (!res.ok) {

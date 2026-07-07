@@ -24,10 +24,14 @@ const MONTH_NAMES = [
  */
 export async function checkSeasonalDemand(searchTerm: string): Promise<SeasonalDemandResult> {
   try {
-    const raw = await googleTrends.interestOverTime({
+    const trendsPromise = googleTrends.interestOverTime({
       keyword: searchTerm,
       startTime: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
     });
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Google Trends request timed out")), 6000)
+    );
+    const raw = await Promise.race([trendsPromise, timeoutPromise]);
 
     const parsed = JSON.parse(raw);
     const timelineData: { time: string; value: number[] }[] =

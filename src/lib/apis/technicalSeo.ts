@@ -17,8 +17,8 @@ export async function checkTechnicalSeo(websiteUrl: string): Promise<TechnicalSe
     const origin = new URL(websiteUrl).origin;
 
     const [robotsRes, sitemapRes] = await Promise.all([
-      fetch(`${origin}/robots.txt`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
-      fetch(`${origin}/sitemap.xml`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
+      fetch(`${origin}/robots.txt`, { signal: AbortSignal.timeout(5000) }).catch(() => null),
+      fetch(`${origin}/sitemap.xml`, { signal: AbortSignal.timeout(5000) }).catch(() => null),
     ]);
 
     const hasRobotsTxt = !!robotsRes && robotsRes.ok;

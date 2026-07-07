@@ -21,7 +21,10 @@ export async function checkLocalCompetition(
     // Step 1: geocode the location to lat/lng via Nominatim (free, no key)
     const geoRes = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(location)}`,
-      { headers: { "User-Agent": "BusinessMarketingDiagnosticTool/1.0 (student FYP project)" } }
+      {
+        headers: { "User-Agent": "BusinessMarketingDiagnosticTool/1.0 (student FYP project)" },
+        signal: AbortSignal.timeout(5000),
+      }
     );
     if (!geoRes.ok) {
       return { checked: false, competitorCount: null, densityLevel: null, topCompetitorNames: [], error: `Geocoding failed (HTTP ${geoRes.status})` };
@@ -38,7 +41,7 @@ export async function checkLocalCompetition(
     const radiusMeters = 3000;
     const keyword = businessType.trim().toLowerCase();
     const overpassQuery = `
-      [out:json][timeout:15];
+      [out:json][timeout:6];
       (
         node["name"](around:${radiusMeters},${lat},${lon});
         way["name"](around:${radiusMeters},${lat},${lon});
@@ -54,6 +57,7 @@ export async function checkLocalCompetition(
         "User-Agent": "BusinessMarketingDiagnosticTool/1.0 (student FYP project)",
       },
       body: overpassQuery,
+      signal: AbortSignal.timeout(6000),
     });
 
     if (!overpassRes.ok) {
